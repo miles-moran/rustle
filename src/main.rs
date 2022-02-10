@@ -7,20 +7,22 @@ static GRAY: &'static str = "gray";
 
 fn main() {
     let solutions = vec!["joker".to_string(), "poker".to_string(), "loner".to_string()];
-    let permutations = generate_color_permutations();
-    for p in permutations {
-        println!("{:?}", p)
-    }
 
     for solution in solutions.clone() {
+        let permutations = generate_color_permutations();
         for guess in solutions.clone() {
             let feedback = get_feedback(solution.clone(), guess.clone());
             println!("{}-{}", solution, guess);
             let trimmed = trim_possibles(solutions.clone(), feedback, guess.clone());
-            let eliminated_count = solutions.len() - trimmed.len();
+            let eliminated_count = (solutions.len() - trimmed.len()) as i32;
+            let mut map: HashMap<String, i32> = HashMap::new();
+            map.insert("p".to_string(), permutations[&feedback]["p"] + 1);
+            map.insert("i".to_string(), permutations[&feedback]["i"] + eliminated_count);
+            permutations[&feedback] = permutations[&feedback];
             println!("{}", eliminated_count);
         }
     }
+
 }
 
 //how probably is sequence (green, yellow, gray) * bits of information log2(1/p)
@@ -33,7 +35,8 @@ fn generate_color_permutations() -> HashMap<Vec<String>, HashMap<String, i32>>{
         let ps = combination.into_iter().permutations(5).unique().collect_vec();
         for permutation in ps {
             let mut map: HashMap<String, i32> = HashMap::new();
-            map.insert("a".to_string(), 0);
+            map.insert("p".to_string(), 0);
+            map.insert("i".to_string(), 0);
             permutations.insert(permutation, map);
         }
 
