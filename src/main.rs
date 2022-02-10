@@ -8,6 +8,9 @@ static GRAY: &'static str = "gray";
 fn main() {
     let solutions = vec!["joker".to_string(), "poker".to_string(), "loner".to_string()];
     let permutations = generate_color_permutations();
+    for p in permutations {
+        println!("{:?}", p)
+    }
 
     for solution in solutions.clone() {
         for guess in solutions.clone() {
@@ -23,11 +26,17 @@ fn main() {
 //how probably is sequence (green, yellow, gray) * bits of information log2(1/p)
 
 //gets every combo feedback could be returned
-fn generate_color_permutations() -> Vec<Vec<String>>{
+fn generate_color_permutations() -> HashMap<Vec<String>, HashMap<String, i32>>{
     let combinations = [GREEN.to_string(), YELLOW.to_string(), GRAY.to_string()].into_iter().combinations_with_replacement(5).collect_vec();
-    let mut permutations = vec![];
+    let mut permutations: HashMap<Vec<String>, HashMap<String, i32>> = HashMap::new();
     for combination in combinations{
-       permutations.append(&mut combination.into_iter().permutations(5).unique().collect_vec());
+        let ps = combination.into_iter().permutations(5).unique().collect_vec();
+        for permutation in ps {
+            let mut map: HashMap<String, i32> = HashMap::new();
+            map.insert("a".to_string(), 0);
+            permutations.insert(permutation, map);
+        }
+
     }
     return permutations;
 }
