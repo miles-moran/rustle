@@ -16,19 +16,25 @@ fn main() {
 
     for solution in solutions.clone() {
         let mut permutations = generate_color_permutations();
+        let mut score = PermutationScore{
+            probability: 0,
+            information: 0
+        };
         for guess in solutions.clone() {
             let feedback = get_feedback(solution.clone(), guess.clone());
             let trimmed = trim_possibles(solutions.clone(), feedback.clone(), guess.clone());
             let eliminated_count = (solutions.len() - trimmed.len()) as i32;
             permutations.insert(feedback.clone(), PermutationScore{
-                information: permutations.get_key_value(&feedback.clone()).unwrap().1.information + eliminated_count,
-                probability: permutations.get_key_value(&feedback.clone()).unwrap().1.probability + 1
+                information: 0,
+                probability: permutations.get_key_value(&feedback.clone()).unwrap().1.probability + eliminated_count
             });
+            score.information += eliminated_count;
         }
-
-        for p in permutations {
-            println!("{:?}", p.1.probability);
-        }
+        println!("----");
+        println!("{}", solution);
+        println!("{:?}", score.probability);
+        println!("{:?}", score.information);
+    
     }
 
 
