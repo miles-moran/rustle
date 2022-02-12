@@ -17,21 +17,22 @@ struct Suggestion {
 }
 
 fn main() {
-    // let solutions = vec!["joker".to_string(), "poker".to_string(), "loner".to_string()];
     let now = Instant::now();
+    
     let solutions = reader::read_words_from_file("./src/assets/solution-lexicon.json")
         .unwrap()
         .words;
-    let mut chars_solution = vec![];
-    // let mut chars_guesses = vec![];
 
-    let mut suggestions = vec![];
-    for s in solutions.clone() {
-        let s_vec = s.chars().collect_vec();
-        chars_solution.push(s_vec);
+    let mut chars_solution = vec![];
+
+    for solution in solutions.clone() {
+        let solution_vec = solution.chars().collect_vec();
+        chars_solution.push(solution_vec);
     }
 
     let colors = generate_color_permutations();
+    let mut suggestions = vec![];
+    //---------------------------------------
     for s in 0..chars_solution.len() - 1 {
         let solution = chars_solution.iter().nth(s).unwrap();
         let mut permutations = colors.clone();
@@ -111,18 +112,15 @@ fn get_feedback(solution: Vec<char>, possible: Vec<char>) -> [u8; 5] {
 
         if solution_char == possible_char {
             feedback[i] = GREEN;
-        }
-
-        if solution_char != possible_char {
+        } else {
             if solution.contains(&possible_char) {
                 //TODO: Gray occurence if occurenes in possible > occurences in solution gray
                 feedback[i] = YELLOW;
-            }
-
-            if !solution.contains(&possible_char) {
+            } else {
                 feedback[i] = GRAY;
             }
         }
     }
+    
     return feedback;
 }
