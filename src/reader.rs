@@ -10,7 +10,7 @@ pub struct User {
     pub words: Vec<String>
 }
 
-pub fn read_words_from_file<P: AsRef<Path>>(path: P) -> Result<User, Box<dyn Error>> {
+fn read_words_from_file<P: AsRef<Path>>(path: P) -> Result<User, Box<dyn Error>> {
     // Open the file in read-only mode with buffer.
     let file = File::open(path)?;
     let reader = BufReader::new(file);
@@ -20,4 +20,10 @@ pub fn read_words_from_file<P: AsRef<Path>>(path: P) -> Result<User, Box<dyn Err
 
     // Return the `User`.
     Ok(u)
+}
+
+pub fn get_words(path:&str) -> Vec<String>{
+    return read_words_from_file(path)
+    .unwrap()
+    .words;
 }
