@@ -22,22 +22,22 @@ fn main() {
 fn solve(solutions:Vec<String>) {
     let now = Instant::now();
     
-    let mut chars_solution = vec![];
+    let mut chars_possible = vec![];
 
-    for solution in solutions.clone() {
-        let solution_vec = solution.chars().collect_vec();
-        chars_solution.push(solution_vec);
+    for possible in solutions.clone() {
+        let solution_vec = possible.chars().collect_vec();
+        chars_possible.push(solution_vec);
     }
 
     let colors = generate_color_permutations();
     let mut suggestions = vec![];
 
-    for s in 0..chars_solution.len() - 1 {
-        let solution = chars_solution.iter().nth(s).unwrap();
+    for s in 0..chars_possible.len() - 1 {
+        let possible = chars_possible.iter().nth(s).unwrap();
         let mut permutations = colors.clone();
 
-        for guess in chars_solution.clone() {
-            let feedback = get_feedback(solution.clone(), guess);
+        for guess in chars_possible.clone() {
+            let feedback = get_feedback(possible.clone(), guess);
             permutations.insert(
                 feedback.clone(),
                 permutations.get_key_value(&feedback).unwrap().1 + 1,
@@ -117,4 +117,42 @@ fn get_words(path:&str) -> Vec<String>{
     return reader::read_words_from_file(path)
     .unwrap()
     .words;
+}
+
+fn trim_possibles(possibles: Vec<String>, feedback: [u8; 5], guess: String) -> Vec<String> {
+    let mut trimmed: Vec<String> = Vec::new();
+    for possible in possibles.clone() {
+        let mut add = true;
+        for i in 0..5 {
+            let color = feedback[i];
+            let guess_char = guess.chars().nth(i).unwrap();
+            let possible_char = possible.chars().nth(i).unwrap();
+           
+            if color == GREEN {
+                if guess_char != possible_char{
+                    add = false;
+                }
+            }
+
+            if color == YELLOW {
+                if guess_char == possible_char{
+                    add = false;
+                }
+                if !possible.contains(guess_char) {
+                    add = false;
+                }
+            }
+
+            if color == GRAY {
+                if possible.contains(guess_char) { //TODO: gray occurences
+                    add = false;
+                }
+            }
+            
+        }
+        if add == true {
+            trimmed.push(possible);
+        }
+    }
+    return trimmed
 }
