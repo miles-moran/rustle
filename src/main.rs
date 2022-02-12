@@ -15,8 +15,10 @@ struct Suggestion {
     score: f32,
 }
 
+
+
 fn main() {
-    let solution = "scare";
+    let solution = "ulcer";
     let mut possibles = get_words("./src/assets/solution-lexicon.json");
     let mut answer:String = "".to_string();
     let mut turn = 0;
@@ -25,23 +27,33 @@ fn main() {
         if turn == 0 {
             guess = "slate".to_string();
         } else {
-            let suggestions = getSuggestions(possibles.clone());
-            guess = suggestions[0].clone().word;
+            if possibles.len() == 1 {
+                guess = possibles[0].to_string();
+            } else {
+                let suggestions = get_suggestions(possibles.clone());
+                // for s in suggestions.clone() {
+                //     println!("{:?}", s);
+                // }
+                guess = suggestions[0].clone().word;
+            }
         }
         
-        let feedback = get_feedback(guess.chars().collect_vec(), solution.chars().collect_vec());
-        possibles = trim_possibles(possibles, feedback, solution.to_string());
-        println!("{}", guess);
-        println!("{:?}", feedback);
-        if solution == guess {
-            answer = guess
+        let feedback = get_feedback(solution.chars().collect_vec(), guess.chars().collect_vec());
+        possibles = trim_possibles(possibles, feedback, guess.to_string());
+        println!("{}", guess.clone());
+        
+        // println!("{:?}", solution);
+        if solution == guess.to_string() {
+            answer = guess;
         }
 
-        turn += 1
+        turn += 1;
+    
     }
 }
 
-fn getSuggestions(solutions:Vec<String>) -> Vec<Suggestion>{
+
+fn get_suggestions(solutions:Vec<String>) -> Vec<Suggestion>{
     let now = Instant::now();
     
     let mut chars_possible = vec![];
@@ -79,12 +91,12 @@ fn getSuggestions(solutions:Vec<String>) -> Vec<Suggestion>{
         };
         suggestions.push(suggestion);
     }
-    suggestions.sort_by(|a, b| a.score.partial_cmp(&b.score).unwrap());
-    for s in suggestions {
-        println!("{:?}", s);
-    }
+    suggestions.sort_by(|a, b| b.score.partial_cmp(&a.score).unwrap());
+    // for s in suggestions.clone() {
+    //     println!("{:?}", s);
+    // }
     let elapsed = now.elapsed();
-    println!("Elapsed: {:.2?}", elapsed);
+    // println!("Elapsed: {:.2?}", elapsed);
     return suggestions;
 }
 
@@ -142,32 +154,32 @@ fn get_words(path:&str) -> Vec<String>{
     .words;
 }
 
-fn trim_possibles(possibles: Vec<String>, feedback: [u8; 5], word: String) -> Vec<String> {
+fn trim_possibles(possibles: Vec<String>, feedback: [u8; 5], solution: String) -> Vec<String> { 
     let mut trimmed: Vec<String> = Vec::new();
-    for possible in possibles.clone() {
+    for possible in possibles {
         let mut add = true;
         for i in 0..5 {
             let color = feedback[i];
-            let guess_char = word.chars().nth(i).unwrap();
+            let solution_char = solution.chars().nth(i).unwrap();
             let possible_char = possible.chars().nth(i).unwrap();
            
             if color == GREEN {
-                if guess_char != possible_char{
+                if solution_char != possible_char{
                     add = false;
                 }
             }
 
             if color == YELLOW {
-                if guess_char == possible_char{
+                if solution_char == possible_char{
                     add = false;
                 }
-                if !possible.contains(guess_char) {
+                if !possible.contains(solution_char) {
                     add = false;
                 }
             }
 
             if color == GRAY {
-                if possible.contains(guess_char) { //TODO: gray occurences
+                if possible.contains(solution_char) { //TODO: gray occurences
                     add = false;
                 }
             }
