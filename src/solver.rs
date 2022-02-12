@@ -13,10 +13,15 @@ struct Suggestion {
     score: f32,
 }
 
-pub fn solve(solution: &str, solutions:Vec<String>) {
+pub struct Attempt {
+    word: String,
+    feedback: [u8; 5],
+}
+
+pub fn solve(solution: &str, solutions:Vec<String>, guesses:Vec<String>) -> Vec<Attempt>{
     let mut possibles = solutions.clone();
     let mut answer:String = "".to_string();
-
+    let mut attempts = vec![];
     let mut turn = 0;
     while answer.is_empty(){
         let mut guess = "".to_string();
@@ -37,13 +42,21 @@ pub fn solve(solution: &str, solutions:Vec<String>) {
         let feedback = get_feedback(solution.chars().collect_vec(), guess.chars().collect_vec());
         possibles = trim_possibles(possibles, feedback, guess.to_string());
 
-        println!("{}", guess.clone());
+        // println!("{}", guess.clone());
         
+        let attempt = Attempt{
+            word: guess.clone(),
+            feedback: feedback
+        };
+
+        attempts.push(attempt);
+
         if solution == guess.to_string() {
             answer = guess;
         }
         turn += 1;
     }
+    return attempts
 }
 
 
