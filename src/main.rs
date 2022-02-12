@@ -18,9 +18,15 @@ struct Suggestion {
 
 
 fn main() {
-    let solution = "ulcer";
-    let mut possibles = get_words("./src/assets/solution-lexicon.json");
+    let possibles = get_words("./src/assets/solution-lexicon.json");
+    let solution = "robot";
+    solve(solution, possibles)
+}
+
+fn solve(solution: &str, solutions:Vec<String>) {
+    let mut possibles = solutions.clone();
     let mut answer:String = "".to_string();
+
     let mut turn = 0;
     while answer.is_empty(){
         let mut guess = "".to_string();
@@ -40,15 +46,13 @@ fn main() {
         
         let feedback = get_feedback(solution.chars().collect_vec(), guess.chars().collect_vec());
         possibles = trim_possibles(possibles, feedback, guess.to_string());
+        
         println!("{}", guess.clone());
         
-        // println!("{:?}", solution);
         if solution == guess.to_string() {
             answer = guess;
         }
-
         turn += 1;
-    
     }
 }
 
