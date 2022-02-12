@@ -1,15 +1,14 @@
 use itertools::Itertools;
 use std::collections::HashMap;
 use std::time::Instant;
+
 static GREEN: u8 = 1;
 static YELLOW: u8 = 2;
 static GRAY: u8 = 3;
 
 mod reader;
+
 #[derive(Clone)]
-struct PermutationScore {
-    count: u16,
-}
 #[derive(Debug)]
 struct Suggestion {
     word: String,
@@ -18,7 +17,6 @@ struct Suggestion {
 
 fn main() {
     let now = Instant::now();
-    
     let solutions = reader::read_words_from_file("./src/assets/solution-lexicon.json")
         .unwrap()
         .words;
@@ -41,19 +39,12 @@ fn main() {
             let feedback = get_feedback(solution.clone(), guess.clone());
             permutations.insert(
                 feedback.clone(),
-                PermutationScore {
-                    count: permutations
-                        .get_key_value(&feedback.clone())
-                        .unwrap()
-                        .1
-                        .count
-                        + 1,
-                },
+                permutations.get_key_value(&feedback.clone()).unwrap().1 + 1,
             );
         }
         let mut score = 0.0;
         for permutation in permutations {
-            let information = permutation.1.count as f32 / solutions.len() as f32;
+            let information = permutation.1 as f32 / solutions.len() as f32;
             if information != 0.0 {
                 let c = (1.0 / information).log2() * information;
                 score += c;
@@ -76,12 +67,12 @@ fn main() {
 //how probably is sequence (green, yellow, gray) * bits of information log2(1/p)
 
 //gets every combo feedback could be returned
-fn generate_color_permutations() -> HashMap<[u8; 5], PermutationScore> {
+fn generate_color_permutations() -> HashMap<[u8; 5], u16> {
     let combinations = [GREEN, YELLOW, GRAY]
         .into_iter()
         .combinations_with_replacement(5)
         .collect_vec();
-    let mut permutations: HashMap<[u8; 5], PermutationScore> = HashMap::new();
+    let mut permutations: HashMap<[u8; 5], u16> = HashMap::new();
     for combination in combinations {
         let ps = combination
             .into_iter()
@@ -89,7 +80,7 @@ fn generate_color_permutations() -> HashMap<[u8; 5], PermutationScore> {
             .unique()
             .collect_vec();
         for permutation in ps {
-            let perm = PermutationScore { count: 0 };
+            let perm = 0;
             let feedback = [
                 permutation[0],
                 permutation[1],
@@ -121,6 +112,5 @@ fn get_feedback(solution: Vec<char>, possible: Vec<char>) -> [u8; 5] {
             }
         }
     }
-    
     return feedback;
 }
