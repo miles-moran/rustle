@@ -9,17 +9,39 @@ static GRAY: u8 = 3;
 mod reader;
 
 #[derive(Debug)]
+#[derive(Clone)]
 struct Suggestion {
     word: String,
     score: f32,
 }
 
 fn main() {
-    let solutions = get_words("./src/assets/solution-lexicon.json");
-    solve(solutions);
+    let solution = "scare";
+    let mut possibles = get_words("./src/assets/solution-lexicon.json");
+    let mut answer:String = "".to_string();
+    let mut turn = 0;
+    while answer.is_empty(){
+        let mut guess = "".to_string();
+        if turn == 0 {
+            guess = "slate".to_string();
+        } else {
+            let suggestions = getSuggestions(possibles.clone());
+            guess = suggestions[0].clone().word;
+        }
+        
+        let feedback = get_feedback(guess.chars().collect_vec(), solution.chars().collect_vec());
+        possibles = trim_possibles(possibles, feedback, solution.to_string());
+        println!("{}", guess);
+        println!("{:?}", feedback);
+        if solution == guess {
+            answer = guess
+        }
+
+        turn += 1
+    }
 }
 
-fn solve(solutions:Vec<String>) {
+fn getSuggestions(solutions:Vec<String>) -> Vec<Suggestion>{
     let now = Instant::now();
     
     let mut chars_possible = vec![];
@@ -63,6 +85,7 @@ fn solve(solutions:Vec<String>) {
     }
     let elapsed = now.elapsed();
     println!("Elapsed: {:.2?}", elapsed);
+    return suggestions;
 }
 
 fn generate_color_permutations() -> HashMap<[u8; 5], u16> {
@@ -119,13 +142,13 @@ fn get_words(path:&str) -> Vec<String>{
     .words;
 }
 
-fn trim_possibles(possibles: Vec<String>, feedback: [u8; 5], guess: String) -> Vec<String> {
+fn trim_possibles(possibles: Vec<String>, feedback: [u8; 5], word: String) -> Vec<String> {
     let mut trimmed: Vec<String> = Vec::new();
     for possible in possibles.clone() {
         let mut add = true;
         for i in 0..5 {
             let color = feedback[i];
-            let guess_char = guess.chars().nth(i).unwrap();
+            let guess_char = word.chars().nth(i).unwrap();
             let possible_char = possible.chars().nth(i).unwrap();
            
             if color == GREEN {
