@@ -9,6 +9,9 @@ pub fn test() {
     for s in solutions.clone() {
         let attempts = solver::solve(&s, solutions.clone(), guesses.clone());
         count += attempts.len();
+        if count == 10{
+            break
+        }
     }
 
     let average =  count as f32 / solutions.len() as f32;

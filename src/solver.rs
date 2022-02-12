@@ -31,7 +31,7 @@ pub fn solve(solution: &str, solutions:Vec<String>, guesses:Vec<String>) -> Vec<
             if possibles.len() == 1 {
                 guess = possibles[0].to_string();
             } else {
-                let suggestions = get_suggestions(possibles.clone());
+                let suggestions = get_suggestions(possibles.clone(), guesses.clone());
                 // for s in suggestions.clone() {
                 //     println!("{:?}", s);
                 // }
@@ -42,7 +42,7 @@ pub fn solve(solution: &str, solutions:Vec<String>, guesses:Vec<String>) -> Vec<
         let feedback = get_feedback(solution.chars().collect_vec(), guess.chars().collect_vec());
         possibles = trim_possibles(possibles, feedback, guess.to_string());
 
-        // println!("{}", guess.clone());
+        println!("{}", guess.clone());
         
         let attempt = Attempt{
             word: guess.clone(),
@@ -60,15 +60,23 @@ pub fn solve(solution: &str, solutions:Vec<String>, guesses:Vec<String>) -> Vec<
 }
 
 
-fn get_suggestions(solutions:Vec<String>) -> Vec<Suggestion>{
+fn get_suggestions(solutions:Vec<String>, guesses:Vec<String>) -> Vec<Suggestion>{
     let now = Instant::now();
     
     let mut chars_possible = vec![];
+    let mut chars_all = vec![];
+    let all = [solutions.clone(), guesses.clone()].concat();
 
     for possible in solutions.clone() {
         let solution_vec = possible.chars().collect_vec();
         chars_possible.push(solution_vec);
     }
+
+    for a in all.clone() {
+        let a_vec = a.chars().collect_vec();
+        chars_all.push(a_vec);
+    }
+    
 
     let colors = generate_color_permutations();
     let mut suggestions = vec![];
@@ -77,7 +85,7 @@ fn get_suggestions(solutions:Vec<String>) -> Vec<Suggestion>{
         let possible = chars_possible.iter().nth(s).unwrap();
         let mut permutations = colors.clone();
 
-        for guess in chars_possible.clone() {
+        for guess in chars_all.clone() {
             let feedback = get_feedback(possible.clone(), guess);
             permutations.insert(
                 feedback.clone(),
