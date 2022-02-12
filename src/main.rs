@@ -8,7 +8,6 @@ static GRAY: u8 = 3;
 
 mod reader;
 
-#[derive(Clone)]
 #[derive(Debug)]
 struct Suggestion {
     word: String,
@@ -16,11 +15,13 @@ struct Suggestion {
 }
 
 fn main() {
-    let now = Instant::now();
-    let solutions = reader::read_words_from_file("./src/assets/solution-lexicon.json")
-        .unwrap()
-        .words;
+    let solutions = get_words("./src/assets/solution-lexicon.json");
+    solve(solutions);
+}
 
+fn solve(solutions:Vec<String>) {
+    let now = Instant::now();
+    
     let mut chars_solution = vec![];
 
     for solution in solutions.clone() {
@@ -30,16 +31,16 @@ fn main() {
 
     let colors = generate_color_permutations();
     let mut suggestions = vec![];
-    //---------------------------------------
+
     for s in 0..chars_solution.len() - 1 {
         let solution = chars_solution.iter().nth(s).unwrap();
         let mut permutations = colors.clone();
 
         for guess in chars_solution.clone() {
-            let feedback = get_feedback(solution.clone(), guess.clone());
+            let feedback = get_feedback(solution.clone(), guess);
             permutations.insert(
                 feedback.clone(),
-                permutations.get_key_value(&feedback.clone()).unwrap().1 + 1,
+                permutations.get_key_value(&feedback).unwrap().1 + 1,
             );
         }
         let mut score = 0.0;
@@ -64,9 +65,6 @@ fn main() {
     println!("Elapsed: {:.2?}", elapsed);
 }
 
-//how probably is sequence (green, yellow, gray) * bits of information log2(1/p)
-
-//gets every combo feedback could be returned
 fn generate_color_permutations() -> HashMap<[u8; 5], u16> {
     let combinations = [GREEN, YELLOW, GRAY]
         .into_iter()
@@ -113,4 +111,10 @@ fn get_feedback(solution: Vec<char>, possible: Vec<char>) -> [u8; 5] {
         }
     }
     return feedback;
+}
+
+fn get_words(path:&str) -> Vec<String>{
+    return reader::read_words_from_file(path)
+    .unwrap()
+    .words;
 }
