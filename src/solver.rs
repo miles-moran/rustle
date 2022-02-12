@@ -6,13 +6,15 @@ static GREEN: u8 = 1;
 static YELLOW: u8 = 2;
 static GRAY: u8 = 3;
 
+static FIRST_GUESS: &str = "saner";
+
 #[derive(Debug)]
 #[derive(Clone)]
-struct Suggestion {
-    word: String,
-    score: f32,
+pub struct Suggestion {
+    pub word: String,
+    pub score: f32,
 }
-
+ 
 pub struct Attempt {
     word: String,
     feedback: [u8; 5],
@@ -26,7 +28,7 @@ pub fn solve(solution: &str, solutions:Vec<String>, guesses:Vec<String>) -> Vec<
     while answer.is_empty(){
         let mut guess = "".to_string();
         if turn == 0 {
-            guess = "slate".to_string();
+            guess = FIRST_GUESS.to_string();
         } else {
             if possibles.len() == 1 {
                 guess = possibles[0].to_string();
@@ -42,7 +44,7 @@ pub fn solve(solution: &str, solutions:Vec<String>, guesses:Vec<String>) -> Vec<
         let feedback = get_feedback(solution.chars().collect_vec(), guess.chars().collect_vec());
         possibles = trim_possibles(possibles, feedback, guess.to_string());
 
-        println!("{}", guess.clone());
+        // println!("{}", guess.clone());
         
         let attempt = Attempt{
             word: guess.clone(),
@@ -60,7 +62,7 @@ pub fn solve(solution: &str, solutions:Vec<String>, guesses:Vec<String>) -> Vec<
 }
 
 
-fn get_suggestions(solutions:Vec<String>, guesses:Vec<String>) -> Vec<Suggestion>{
+pub fn get_suggestions(solutions:Vec<String>, guesses:Vec<String>) -> Vec<Suggestion>{
     let now = Instant::now();
     
     let mut chars_possible = vec![];
@@ -77,7 +79,6 @@ fn get_suggestions(solutions:Vec<String>, guesses:Vec<String>) -> Vec<Suggestion
         chars_all.push(a_vec);
     }
     
-
     let colors = generate_color_permutations();
     let mut suggestions = vec![];
 
@@ -94,7 +95,7 @@ fn get_suggestions(solutions:Vec<String>, guesses:Vec<String>) -> Vec<Suggestion
         }
         let mut score = 0.0;
         for permutation in permutations {
-            let information = permutation.1 as f32 / solutions.len() as f32;
+            let information = permutation.1 as f32 / all.len() as f32;
             if information != 0.0 {
                 let c = (1.0 / information).log2() * information;
                 score += c;
