@@ -1,7 +1,6 @@
 use itertools::Itertools;
 use std::collections::HashMap;
 use std::time::Instant;
-
 static GREEN: &'static str = "green";
 static YELLOW: &'static str = "yellow";
 static GRAY: &'static str = "gray";
@@ -12,18 +11,39 @@ struct PermutationScore {
     count: i16,
 }
 
+#[derive(Debug)]
+struct Suggestion {
+    word: String,
+    score: f32
+}
+
 fn main() {
     // let solutions = vec!["joker".to_string(), "poker".to_string(), "loner".to_string()];
     let now = Instant::now();
-    let solutions = reader::read_words_from_file("./src/assets/solution-pool.json").unwrap().words;
-    let mut test = vec![];
+    let solutions = reader::read_words_from_file("./src/assets/solution-lexicon.json").unwrap().words;
+    let guesses = reader::read_words_from_file("./src/assets/guess-lexicon.json").unwrap().words;
+    
+    let mut chars_solution = vec![];
+    let mut chars_guesses = vec![];
+
+    let mut suggestions = vec![];
     for s in solutions.clone() {
-        let t = s.chars().collect_vec();
-        test.push(t)
+        let s_vec = s.chars().collect_vec();
+        chars_solution.push(s_vec);
     }
-    for solution in test.clone() {
+
+    for g in guesses.clone() {
+        let g_vec = g.chars().collect_vec();
+        chars_solution.push(g_vec);
+    }
+    let both = [solutions.clone(), guesses.clone()].concat();
+    let chars_both = [chars_solution.clone(), chars_guesses].concat();
+    
+    for s in 0..chars_solution.len() - 1{
+        println!("{}", s);
+        let solution = chars_solution.iter().nth(s).unwrap();
         let mut permutations = generate_color_permutations();
-        for guess in test.clone() {
+        for guess in chars_both.clone() {
             let feedback = get_feedback(solution.clone(), guess.clone());
             permutations.insert(feedback.clone(), PermutationScore{
                 count: permutations.get_key_value(&feedback.clone()).unwrap().1.count + 1
@@ -32,19 +52,20 @@ fn main() {
         let mut score = 0.0;
         for permutation in permutations {
             let information = permutation.1.count as f32 / solutions.len() as f32;
-            if (information != 0.0){
+            if information != 0.0{
                 let c = (1.0/information).log2() * information;
                 score += c;
             }
         }
-        println!("{:?}", solution);
-        println!("---");
-        println!("{}", score);
-        break
-        // println!("{:#}", (score.information / score.probability as f32));
+        let suggestion = Suggestion{
+            word: both[s].to_string(),
+            score: score
+        };
+        suggestions.push(suggestion);
     }
-
-
+    
+    suggestions.sort_by(|a, b| b.score.partial_cmp(&a.score).unwrap());
+    println!("{:?}", suggestions);
     let elapsed = now.elapsed();
     println!("Elapsed: {:.2?}", elapsed);
 }
@@ -93,40 +114,40 @@ fn get_feedback(solution:Vec<char>, possible:Vec<char>) -> [&'static str; 5] {
     return feedback
 }
 
-fn trim_possibles(possibles: Vec<String>, feedback: Vec<String>, guess: String) -> Vec<String> {
-    let mut trimmed: Vec<String> = Vec::new();
-    for possible in possibles.clone() {
-        let mut add = true;
-        for i in 0..5 {
-            let color = feedback.iter().nth(i).unwrap();
-            let guess_char = guess.chars().nth(i).unwrap();
-            let possible_char = possible.chars().nth(i).unwrap();
+// fn trim_possibles(possibles: Vec<String>, feedback: Vec<String>, guess: String) -> Vec<String> {
+//     let mut trimmed: Vec<String> = Vec::new();
+//     for possible in possibles.clone() {
+//         let mut add = true;
+//         for i in 0..5 {
+//             let color = feedback.iter().nth(i).unwrap();
+//             let guess_char = guess.chars().nth(i).unwrap();
+//             let possible_char = possible.chars().nth(i).unwrap();
            
-            if color == GREEN {
-                if guess_char != possible_char{
-                    add = false;
-                }
-            }
+//             if color == GREEN {
+//                 if guess_char != possible_char{
+//                     add = false;
+//                 }
+//             }
 
-            if color == YELLOW {
-                if guess_char == possible_char{
-                    add = false;
-                }
-                if !possible.contains(guess_char) {
-                    add = false;
-                }
-            }
+//             if color == YELLOW {
+//                 if guess_char == possible_char{
+//                     add = false;
+//                 }
+//                 if !possible.contains(guess_char) {
+//                     add = false;
+//                 }
+//             }
 
-            if color == GRAY {
-                if possible.contains(guess_char) { //TODO: gray occurences
-                    add = false;
-                }
-            }
+//             if color == GRAY {
+//                 if possible.contains(guess_char) { //TODO: gray occurences
+//                     add = false;
+//                 }
+//             }
             
-        }
-        if add == true {
-            trimmed.push(possible);
-        }
-    }
-    return trimmed
-}
+//         }
+//         if add == true {
+//             trimmed.push(possible);
+//         }
+//     }
+//     return trimmed
+// }
