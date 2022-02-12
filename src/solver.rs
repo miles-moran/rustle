@@ -16,8 +16,8 @@ pub struct Suggestion {
 }
  
 pub struct Attempt {
-    word: String,
-    feedback: [u8; 5],
+    pub word: String,
+    pub feedback: [u8; 5],
 }
 
 pub fn solve(solution: &str, solutions:Vec<String>, guesses:Vec<String>) -> Vec<Attempt>{
